@@ -1,0 +1,32 @@
+{
+  "name": "etap-agent",
+  "version": "1.0.3",
+  "private": true,
+  "scripts": {
+    "start": "node etap-agent.js"
+  },
+  "devDependencies": {
+    "closure-linter-wrapper": "^0.2.9",
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.5.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-gjslint": "^0.1.4",
+    "grunt-mocha": "^0.4.11",
+    "grunt-mocha-cli": "^1.9.0",
+    "grunt-mocha-istanbul": "^1.5.0",
+    "grunt-mocha-test": "^0.11.0",
+    "mocha": "^1.21.3",
+    "nock-exec": "0.1.0"
+  },
+  "dependencies": {
+    "q": "1.0.1",
+    "amqplib": "0.1.3",
+    "log4js": "0.6.14",
+    "xmldoc": "0.1.2",
+    "node-windows": "0.1.5",
+    "bson": "0.2.15"
+  }
+}

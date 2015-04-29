@@ -8,7 +8,7 @@ var g_q = require("q");
 // local requires
 var TopicListener = require("./listeners/topic");
 var ExecutionListener = require("./listeners/execution");
-var Sender = require("./RabbitSender");
+var rabbitmqSender = require("./RabbitSender");
 
 // global variables
 var logger = global.logger;
@@ -59,10 +59,10 @@ var Connection = function (server, heartbeat) {
         return l_deferredReturn.promise;
     };
 
-    this.createSender = function(queue, silo) {
-        var sender = new RabbitSender(queue, silo);
-        channels.push(sender);
-        return sender;
+    this.createRabbitSender = function(queue) {
+        var rabbitSender = new rabbitmqSender(queue);
+        channels.push(rabbitSender);
+        return rabbitSender;
     };
 
     var start = this.start = function () {

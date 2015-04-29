@@ -5,8 +5,10 @@ var q = require("q");
 
 // global variables
 var logger = global.logger;
+var body = require('../Http/httpSender');
+var p_message = body;
 
-var RabbitSender = function(p_queue, silo)
+var rabbitmqSender = function(p_queue)
 {
     this.qq = p_queue;
     var m_channel = null,
@@ -25,7 +27,7 @@ var RabbitSender = function(p_queue, silo)
 
             if (p_channel) {
 
-                var p_message = silo.getJobs(deferredReturn);
+                //var p_message = silo.getJobs(deferredReturn);
 
                 var str_message = JSON.stringify(p_message);
 
@@ -68,7 +70,7 @@ var RabbitSender = function(p_queue, silo)
                 p_channel.on("close", function(){
                     logger.info("closed the channel : " + m_queue);
                     m_channel = null;
-                    if (silo) silo.stop();
+                   // if (silo) silo.stop();
                     createChannel();
                 });
 
@@ -80,7 +82,8 @@ var RabbitSender = function(p_queue, silo)
                     .then(function() {
                         m_channel = p_channel;
 
-                        if (silo) silo.start(sendData);
+                       // if (silo) silo.start(sendData);
+                        p_message.sendData();
                     });
             });
         }
@@ -128,10 +131,10 @@ var RabbitSender = function(p_queue, silo)
 
     this.sendMessage = function(p_message)
     {
-        if (silo) {
+       /* if (silo) {
             silo.addJob(p_message);
             return;
-        }
+        } */
 
         var str_message = JSON.stringify(p_message);
 
@@ -152,4 +155,4 @@ var RabbitSender = function(p_queue, silo)
     };
 };
 
-module.exports = RabbitSender;
+module.exports = rabbitmqSender;

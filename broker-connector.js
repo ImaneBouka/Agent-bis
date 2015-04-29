@@ -12,7 +12,6 @@ var http = require ('http');
 var Connection = require('./rabbitmq/index').Connection;
 var executor = require('./executor');
 
-var Silo = require("./utils/silos/silo");
 
 var server = global.mqServer;
 var heartbeats = global.heartbeats || 60;
@@ -167,9 +166,9 @@ exports.BrokerConnector = function()
         m_executionMessage = null,
         // New communication
         m_topicChannelWrapper = m_connection.createTopicListener(g_topicExchange, g_topicQueue,g_topicPattern),
-        m_statusSilo = new Silo("status." + global.agentHost +"."),
-        m_statusChannelWrapper = m_connection.createSender(g_statusQueue, m_statusSilo),
-        m_reportChannelWrapper = m_connection.createSender(g_reportQueue, new Silo("report." + global.agentHost +".")),
+
+        m_statusChannelWrapper = m_connection.createRabbitSender(g_statusQueue),
+        m_reportChannelWrapper = m_connection.createRabbitSender(g_reportQueue),
         self = this,
         interfaces=os.networkInterfaces(),
         m_agentIP =  (function(){

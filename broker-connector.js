@@ -8,8 +8,10 @@ var g_q = require("q");
 var path = require('path');
 var fs = require('fs');
 var http = require ('http');
+var body = require ('./Http/httpSender');
 
-var Connection = require('./rabbitmq/index').Connection;
+var isGateway = global.mode;
+var Connection = isGateway == 'gateway' ? require('./Http/index').Connection : require('./Rabbitmq/index').Connection;
 var executor = require('./executor');
 
 
@@ -25,7 +27,7 @@ var g_topicPattern = [global.applicationName,global.agentHost,'#'].join('.');
 var g_statusQueue = 'etap.status';
 var g_reportQueue = 'etap.report';
 
-var isGateway = global.mode;
+
 
 exports.BrokerConnector = function()
 {
@@ -119,11 +121,10 @@ exports.BrokerConnector = function()
         logger.debug("updateInstanceInformation("+JSON.stringify(p_chocolateyInstalledSoftwarePackages)+")");
         var instanceInformationMessage = {'hostName': global.agentHost, 'ip': m_agentIP, 'softs': p_chocolateyInstalledSoftwarePackages};
 
-      /*if (isGateway === 'gateway') {
-            http.post({queue:'report', payload:instanceInformationMessage});
-            m_reportHttp.sendMessage(instanceInformationMessage);
+        if (isGateway === 'gateway') {
+            m_reportChannelWrapper.sendMessage(body);
         }
-        else */
+        else
             m_reportChannelWrapper.sendMessage(instanceInformationMessage);
     };
 

@@ -6,7 +6,7 @@ var g_q = require("q");
 var logger = global.logger;
 var executor = require('./executor');
 var fs = require('fs');
-var Silo = require("./utils/silos/silo");
+//var Silo = require("./utils/silos/silo");
 var g_broker = require('./broker-connector');
 var objectid = require('bson').ObjectID;
 
@@ -24,7 +24,7 @@ var m_busy = false;
 var m_hasPending = 0;
 var m_pendingSysLowMessages = [];
 var m_pendingExecMessages = [];
-var m_statusSilo = new Silo("status");
+//var m_statusSilo = new Silo("status");
 var m_connection = null;
 var m_isStart = true;
 var m_donePriorMessage = false;
@@ -334,7 +334,7 @@ function initHandler(p_channel, p_connection) {
 
   if (!m_executionHandler) {
     // construct ExecutionHandler
-    m_executionHandler = new ExecutionHandler(m_connection, g_broker, executor, m_channel, m_statusSilo, logger);
+    m_executionHandler = new ExecutionHandler(m_connection, g_broker, executor, m_channel, logger);
   } else {
     m_executionHandler.setChannel(p_channel);
   }

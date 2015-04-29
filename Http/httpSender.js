@@ -61,7 +61,7 @@ var httpSender = function(p_queue) {
          silo.addJob(p_message);
          return;
          } */
-        var p_message = body;
+        var p_message = options.body;
         var str_message = JSON.stringify(p_message);
 
         logger.debug("2SendingChannelWrapper::doSendMessage(" + m_queue + "," + str_message + ")");

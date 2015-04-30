@@ -11,7 +11,7 @@ var http = require ('http');
 var body = require ('./Http/httpSender');
 
 var isGateway = global.mode;
-var Connection = isGateway == 'gateway' ? require('./Http/index').Connection : require('./Rabbitmq/index').Connection;
+var Connection = isGateway === 'gateway' ? require('./Http/index').Connection : require('./Rabbitmq/index').Connection;
 var executor = require('./executor');
 
 

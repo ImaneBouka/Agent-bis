@@ -6,7 +6,7 @@ var q = require("q");
 // global variables
 var logger = global.logger;
 var body = require('../Http/httpSender');
-var p_message = body;
+
 
 var rabbitmqSender = function(p_queue)
 {
@@ -28,7 +28,7 @@ var rabbitmqSender = function(p_queue)
             if (p_channel) {
 
                 //var p_message = silo.getJobs(deferredReturn);
-
+                var p_message = body;
                 var str_message = JSON.stringify(p_message);
 
                 logger.debug("SendingChannelWrapper::doSendMessage("+m_queue+","+str_message+")");
@@ -83,7 +83,7 @@ var rabbitmqSender = function(p_queue)
                         m_channel = p_channel;
 
                        // if (silo) silo.start(sendData);
-                        p_message.sendData();
+                        body.sendData();
                     });
             });
         }
@@ -135,7 +135,7 @@ var rabbitmqSender = function(p_queue)
             silo.addJob(p_message);
             return;
         } */
-
+        var p_message = body;
         var str_message = JSON.stringify(p_message);
 
         logger.debug("2SendingChannelWrapper::doSendMessage("+m_queue+","+str_message+")");

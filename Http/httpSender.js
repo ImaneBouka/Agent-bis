@@ -4,6 +4,8 @@
 
 var fs = require('fs');
 var request = require('request');
+var body = require('../Http/httpSender');
+
 
 var httpSender = function(p_queue) {
     this.qq = p_queue;
@@ -32,6 +34,43 @@ var httpSender = function(p_queue) {
         }
     });
 
+    var createChannel = function()
+    {
+        logger.debug("SendingChannelWrapper::createChannelAndSendMessage("+m_queue+")");
+        if (m_connection) {
+            m_connection.createConfirmChannel().then(function finalizeChannelCreation(p_channel){
+
+                p_channel.on("close", function(){
+                    logger.info("closed the channel : " + m_queue);
+                    m_channel = null;
+                    createChannel();
+                });
+
+                p_channel.on("error", function(err){
+                    logger.error("Error on the channel : " + m_queue + " " + err);
+                });
+
+                p_channel.assertQueue(m_queue, {durable: true})
+                    .then(function() {
+                        m_channel = p_channel;
+
+                        body.sendMessage();
+                    });
+            });
+        }
+    };
+
+    var closeChannel = function() {
+        if (m_channel != null)
+            try {
+                m_channel.close();
+                m_channel = null;
+            } catch (e)
+            {
+                logger.error("caught error while closing channel: "+ e.stack);
+            }
+        else logger.error("tried to close null channel !!!");
+    };
 // -------------------------------------------------------------------
 // Public functions
 // -------------------------------------------------------------------
@@ -61,7 +100,7 @@ var httpSender = function(p_queue) {
          silo.addJob(p_message);
          return;
          } */
-        var p_message = options.body;
+        var p_message = body;
         var str_message = JSON.stringify(p_message);
 
         logger.debug("2SendingChannelWrapper::doSendMessage(" + m_queue + "," + str_message + ")");

@@ -11,7 +11,7 @@ global.configuration = require('../config.json');
 global.agentHost =  os.hostname().toLowerCase();
 global.applicationName = 'cta';
 
-var localConfFile = path.join(__dirname, '../../config.' + os.hostname() + '.json');
+var localConfFile = path.join(__dirname, '../config.' + os.hostname() + '.json');
 if (fs.existsSync(localConfFile)) {
     var localConf = require(localConfFile);
     logger.info('Local configuration for ' + os.hostname() + ' is ' + JSON.stringify(localConf, null, 4));

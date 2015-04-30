@@ -10,8 +10,8 @@ var fs = require('fs');
 var http = require ('http');
 var body = require ('./Http/httpSender');
 
-var isGateway = global.mode;
-var Connection = isGateway === 'gateway' ? require('./Http/index').Connection : require('./Rabbitmq/index').Connection;
+var isGateway = (global.mode  === 'gateway');
+var Connection = isGateway ? require('./Http').Connection : require('./Rabbitmq').Connection;
 var executor = require('./executor');
 
 
@@ -120,12 +120,7 @@ exports.BrokerConnector = function()
     this.updateInstanceInformation = function(p_chocolateyInstalledSoftwarePackages) {
         logger.debug("updateInstanceInformation("+JSON.stringify(p_chocolateyInstalledSoftwarePackages)+")");
         var instanceInformationMessage = {'hostName': global.agentHost, 'ip': m_agentIP, 'softs': p_chocolateyInstalledSoftwarePackages};
-
-        if (isGateway === 'gateway') {
-            m_reportChannelWrapper.sendMessage(body);
-        }
-        else
-            m_reportChannelWrapper.sendMessage(instanceInformationMessage);
+        m_reportChannelWrapper.sendMessage(instanceInformationMessage);
     };
 
     this.end = function()
@@ -162,14 +157,14 @@ exports.BrokerConnector = function()
   };
 
     // constructor
-    var m_connection = Connection(server, heartbeats),
+    var m_connection = Connection(isGateway ? global.gatewayServer : global.mqServer, heartbeats),
 
         m_executionMessage = null,
         // New communication
         m_topicChannelWrapper = m_connection.createTopicListener(g_topicExchange, g_topicQueue,g_topicPattern),
 
-        m_statusChannelWrapper = m_connection.createRabbitSender(g_statusQueue),
-        m_reportChannelWrapper = m_connection.createRabbitSender(g_reportQueue),
+        m_statusChannelWrapper = m_connection.createSender(g_statusQueue),
+        m_reportChannelWrapper = m_connection.createSender(g_reportQueue),
         self = this,
         interfaces=os.networkInterfaces(),
         m_agentIP =  (function(){

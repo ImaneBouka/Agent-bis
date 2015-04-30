@@ -59,7 +59,7 @@ var Connection = function (server, heartbeat) {
         return l_deferredReturn.promise;
     };
 
-    this.createRabbitSender = function(queue) {
+    this.createSender = function(queue) {
         var rabbitSender = new rabbitmqSender(queue);
         channels.push(rabbitSender);
         return rabbitSender;

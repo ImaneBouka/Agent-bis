@@ -9,9 +9,17 @@ var fs = require('fs');
 var q = require("q");
 var path = require("path");
 
+var express    = require('express');
+var app = express();
+var bodyParser = require('body-parser');
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
 var exec = require("child_process").exec;
 var logger = global.logger;
 
+var g_postQueue = 'testPost';
 var g_brokerConnector = null;
 
 function commonParameters(inputStatus, statusPayload) {
@@ -374,22 +382,6 @@ var agentStatus = function(req, res) {
     res.end();
 }
 
-var augmentRequest = function(req) {
-    var parsedUrl = url.parse(req.url, true);
-    req.originalPathname = parsedUrl.pathname;
-    req.pathname = parsedUrl.pathname.toLowerCase();
-    req.param = function(paramName) {
-        return parsedUrl.query[paramName];
-    };
-    req.params = parsedUrl.query;
-    return req;
-};
-
-var augmentResponse = function(res) {
-    res.header = res.setHeader;
-    return res;
-};
-
 var eikonVersion = function(req, res) {
     var evu = require("./../utils/eikon/eikon-version-util");
     evu.getEIKONVersion().then(function versionFound(currVersion)
@@ -543,38 +535,6 @@ var staticFiles = function(request, response, rootDir) {
     };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     path.exists(filename, function(exists) {
         if(!exists) {
             response.writeHead(404, {"Content-Type": "text/plain"});
@@ -603,54 +563,76 @@ var staticFiles = function(request, response, rootDir) {
     });
 };
 
-var routeHandler = function(req, res) {
-    req = augmentRequest(req);
-    res = augmentResponse(res);
+var routeHandler = express.Router();
+routeHandler.post('/proxy/:task' , function(req, res) {
+    var task = req.params['task'];
     logger.debug("Request for " + req.pathname + " received.");
+    console.log(req.body);
+    if (g_brokerConnector) {
+        g_brokerConnector.execute(req.body);
+        res.status(200).json({ message: 'sent to agent' });
+    }
+    else {
+        res.status(500).json({ message: 'no agent' });
+    }
 
-    switch (req.method) {
-        case 'POST':
-            var postData = '';
-            req.on('data', function(chunk) {
-                postData+=chunk;
-            });
+});
 
-            req.on('end', function() {
-                req.body = {};
-                try{
-                    req.body = JSON.parse(postData);
-                }catch(e){
-                    res.writeHead(504, {"Content-Type": "text/plain"});
-                    res.write("Unable to parse JSON:" + e.message + "\n Text:" + postData);
-                    res.end();
-                    return;
-                }
-                switch(req.pathname) {
-                    case '/testframework/teststatus': return postTestStatus(req, res);
-                    case '/testframework/stepstatus': return postStepStatus(req, res);
-                    case '/testframework/testlist': return postTestList(req, res);
-                }
-            });
-            return;
-            break;
-        default:
-            switch(req.pathname) {
-                case '/testframework/teststatus': return getTestStatus(req, res);
-                case '/testframework/stepstatus': return getStepStatus(req, res);
-                case '/testframework/agentstatus': return agentStatus(req, res);
-                case '/testframework/eikonversion': return eikonVersion(req, res);
-                case '/testframework/screenshot': return screenshot(req, res);
-                case '/testframework/testlist': return getTestList(req, res);
-                case '/testdata/testuser': return getTestData(req, res);
-                case '/mq/internalmessages':
-                case '/mq/internalmessage':
-                    return getInternalMessages(req, res);
-                case '/mq/removemessage':
-                    return removeMessage(req, res);
-                case '/mq/clearmessages':
-                case '/mq/clearmessage':
-                    return clearMessage(req, res);
-                default : {
+routeHandler.post('/testframework/teststatus' , function(req, res) {
+    return postTestStatus(req, res);
+});
+routeHandler.post('/testframework/stepstatus' , function(req, res) {
+    return postStepStatus(req, res);
+});
+routeHandler.post('/testframework/testlist' , function(req, res) {
+    return postStepStatus(req, res);
+});
+routeHandler.post('/testframework/stepstatus' , function(req, res) {
+    return postStepStatus(req, res);
+});
+
+
+
+routeHandler.get('/testframework/teststatus', function(req, res) {
+    return getTestStatus(req, res);
+});
+routeHandler.get('/testframework/stepstatus', function(req, res) {
+    return getStepStatus(req, res);
+});
+routeHandler.get('/testframework/agentstatus', function(req, res) {
+    return agentStatus(req, res);
+});
+routeHandler.get('/testframework/eikonversion', function(req, res) {
+    return eikonVersion(req, res);
+});
+routeHandler.get('/testframework/screenshot', function(req, res) {
+    return screenshot(req, res);
+});
+routeHandler.get('/testframework/testlist', function(req, res) {
+    return getTestList(req, res);
+});
+routeHandler.get('/testdata/testuser', function(req, res) {
+    return getTestData(req, res);
+});
+routeHandler.get('/mq/internalmessages', function(req, res) {
+    return getInternalMessages(req, res);
+});
+routeHandler.get('/mq/internalmessage', function(req, res) {
+    return getInternalMessages(req, res);
+});
+routeHandler.get('/mq/removemessage', function(req, res) {
+    return removeMessage(req, res);
+});
+routeHandler.get('/mq/clearmessages', function(req, res) {
+    return clearMessage(req, res);
+});
+routeHandler.get('/mq/clearmessage', function(req, res) {
+    return clearMessage(req, res);
+});
+
+
+         /*       default :
+                {
                     var rootDir = 'swagger';
 
                     if (req.pathname.indexOf('/api-docs') == 0) {
@@ -662,12 +644,13 @@ var routeHandler = function(req, res) {
                     return staticFiles(req, res, rootDir);
                 }
             }
-    }
 
+    }
     res.writeHead(404, {"Content-Type": "text/plain"});
     res.write("No handlers for "+req.method+" request on : "+req.pathname);
     res.end();
-};
+});
+*/
 
 var testList = function(req, res, params) {
     var sep = ',';
@@ -717,36 +700,31 @@ var error = function(text) {
 var l_deferredReturn = q.defer();
 
 var start = function(brokerConnector) {
-
+    var defer = q.defer();
     if (brokerConnector == null) {
         logger.error("Please provide a broker connector before starting the rest api.")
-        return;
+        return defer.reject();
     }
-
-    g_brokerConnector = brokerConnector;
-
-    /**
-     * Starts local REST server
-     */
-    var server = http.createServer(routeHandler);
-
-    server.on('error', function(e) {
+    else {
+        g_brokerConnector = brokerConnector;
+    }
+    app.use('/', routeHandler);
+    app.on('error', function(e) {
         if (e.code === "EADDRINUSE") { error("An other application is using the agent REST-API on port #"+global.agentPort+" !\nPerhaps another ETAPAgent is already running ?"); }
         else error("The ETAPAgent encountered the following error on its REST-API server : "+ e.message);
 
-        try { server.close(); } catch(e){};
+        try { app.close(); } catch(e){};
         tryToStartAgain();
     });
 
-    server.listen(global.agentPort, function(err){
-        if (l_deferredReturn && err) return l_deferredReturn.reject();
+    app.listen(global.agentPort, function(err){
+        if (err) return defer.reject();
         m_retrialNB = 0;
         logger.info('Express server [' + process.title + ':' + global.version + '] listening on port ' + global.agentPort);
-        if (l_deferredReturn) l_deferredReturn.resolve();
-        l_deferredReturn = null;
+        defer.resolve();
     });
 
-    return l_deferredReturn?l_deferredReturn.promise:null;
+    return defer.promise;
 };
 
 exports.start = start;

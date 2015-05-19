@@ -123,6 +123,10 @@ exports.BrokerConnector = function()
         m_reportChannelWrapper.sendMessage(instanceInformationMessage);
     };
 
+    this.execute = function(jobPayload){
+        return executor.executeWithETAPEnvironment(jobPayload);
+    };
+
     this.end = function()
     {
         m_connection.end();

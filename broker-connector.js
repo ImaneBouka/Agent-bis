@@ -6,6 +6,7 @@
 var os=require('os');
 var g_q = require("q");
 var child_process = require('child_process');
+var azure = require('azure');
 
 var isGateway = (global.mode  === 'gateway');
 var Connection = isGateway ? require('./Http').Connection : require('./Rabbitmq').Connection;
@@ -121,6 +122,15 @@ exports.BrokerConnector = function()
                 m_agentIP = t[t.length - 1].trim();
                 console.log('public ip: ['+ m_agentIP + ']');
             }
+            azure.RoleEnvironment.isAvailable(function(error, available) {
+                if (available) {
+                    azure.RoleEnvironment.getConfigurationSettings(function(error, settings) {
+                        if (!error) {
+                            console.log('Azure settings', settings);
+                        }
+                    });
+                }
+            });
             logger.debug("updateInstanceInformation("+JSON.stringify(p_chocolateyInstalledSoftwarePackages)+")");
             var instanceInformationMessage = {'hostName': global.agentHost, 'ip': m_agentIP, 'softs': p_chocolateyInstalledSoftwarePackages};
             m_reportChannelWrapper.sendMessage(instanceInformationMessage);

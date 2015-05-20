@@ -564,8 +564,8 @@ var staticFiles = function(request, response, rootDir) {
 };
 
 var routeHandler = express.Router();
-routeHandler.post('/proxy/:task' , function(req, res) {
-    var task = req.params['task'];
+routeHandler.post('/proxy/:task?' , function(req, res) {
+    var task = req.params['task'] || 'jobs';
     logger.debug("Request for " + req.pathname + " received.");
     console.log(req.body);
     if (g_brokerConnector) {

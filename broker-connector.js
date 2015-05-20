@@ -5,10 +5,7 @@
 
 var os=require('os');
 var g_q = require("q");
-var path = require('path');
-var fs = require('fs');
-var http = require ('http');
-var body = require ('./Http/httpSender');
+var child_process = require('child_process');
 
 var isGateway = (global.mode  === 'gateway');
 var Connection = isGateway ? require('./Http').Connection : require('./Rabbitmq').Connection;
@@ -118,9 +115,17 @@ exports.BrokerConnector = function()
     };
 
     this.updateInstanceInformation = function(p_chocolateyInstalledSoftwarePackages) {
-        logger.debug("updateInstanceInformation("+JSON.stringify(p_chocolateyInstalledSoftwarePackages)+")");
-        var instanceInformationMessage = {'hostName': global.agentHost, 'ip': m_agentIP, 'softs': p_chocolateyInstalledSoftwarePackages};
-        m_reportChannelWrapper.sendMessage(instanceInformationMessage);
+        child_process.exec('reg.exe QUERY "HKLM\\SOFTWARE\\Microsoft\\Windows Azure\\BGInfo" /v PublicIp', function(error, stdout, stderr){
+            if (!error) {
+                var t = stdout.split(' ');
+                m_agentIP = t[t.length - 1].trim();
+                console.log('public ip: ['+ m_agentIP + ']');
+            }
+            logger.debug("updateInstanceInformation("+JSON.stringify(p_chocolateyInstalledSoftwarePackages)+")");
+            var instanceInformationMessage = {'hostName': global.agentHost, 'ip': m_agentIP, 'softs': p_chocolateyInstalledSoftwarePackages};
+            m_reportChannelWrapper.sendMessage(instanceInformationMessage);
+        });
+
     };
 
     this.execute = function(jobPayload){

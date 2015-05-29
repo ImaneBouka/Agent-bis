@@ -1,14 +1,14 @@
 'use strict';
 
-require('./utils/logs');
-require('./utils/config');
+require('./lib/utils/logs');
+require('./lib/utils/config');
 
 
 process.title = global.applicationName + "-agent - " + "[" + global.agentHost +"]";
 
-var g_brokerConnectorNS = require("./broker-connector");
-var shutdown = require("./utils/shutdown");
-var restAPI = require("./Rest/rest-api.js");
+var g_brokerConnectorNS = require("./lib/broker-connector");
+var shutdown = require("./lib/utils/shutdown");
+var restAPI = require("./lib/Rest/rest-api.js");
 
 /**
  * Default configuration

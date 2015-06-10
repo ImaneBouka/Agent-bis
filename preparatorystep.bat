@@ -7,6 +7,10 @@ IF %ERRORLEVEL% == 0 (
     SET CTA_PATH=\\lx-eu-etapshare-prod2.amers2.ciscloud\public
 )
 
+IF /I [%1] == [false] (
+    ECHO No shared drive
+    EXIT /B 0
+)
 
 IF NOT [%1] == [] SET DRIVE=%~1
 IF NOT [%2] == [] SET CTA_PATH=%~2

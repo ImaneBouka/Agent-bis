@@ -15,7 +15,6 @@ var restAPI = require("./lib/Rest/rest-api.js");
  */
 global.mqServer = global.mqServer || "etaprabbit.int.thomsonreuters.com";
 global.agentPort = global.agentPort || 3000;
-global.sharedDrive = global.sharedDrive || "f:";
 
 /**
  * Connect to broker

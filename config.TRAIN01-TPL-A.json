@@ -1,7 +1,7 @@
 {
   "mqServer": "localhost",
   "gatewayServer": "http://localhost:3003",
-  "sharedDrive":"f:",
+  "sharedDrive":false,
   "apiServer":"localhost",
   "apiPort":3001,
   "agentPort":3000,

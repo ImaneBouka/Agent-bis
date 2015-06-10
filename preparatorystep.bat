@@ -9,7 +9,7 @@ IF %ERRORLEVEL% == 0 (
 
 IF /I [%1] == [false] (
     ECHO No shared drive
-    EXIT /B 0
+    GOTO :EOF
 )
 
 IF NOT [%1] == [] SET DRIVE=%~1
@@ -24,3 +24,5 @@ IF ERRORLEVEL 1 (
 ) ELSE (
     ECHO Shared drive !DRIVE! on !CTA_PATH! already available
 )
+
+
